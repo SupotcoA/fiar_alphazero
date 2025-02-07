@@ -24,10 +24,10 @@ AlphaDog 是一个受 AlphaGo 系列启发的五子棋 AI。它结合了深度�
 ## Usage
 
 - **Training**: To train the AI model, run the `_AlphaDog.py` script. You can adjust hyperparameters.
-- **Playing**: To play against the AI, run the `WZQ_Pygame.py` script. You can try PvP/PvC/CvC.
+- **Playing**: To play against AI or check AI performance, run the `WZQ_Pygame.py` script. You can try PvP/PvC/CvC. Pre-trained models are in folder `Trained`.
 
 - **训练**：运行 `_AlphaDog.py` 脚本来训练 AI 模型。你可以调整超参数。
-- **对弈**：运行 `WZQ_Pygame.py` 脚本来与 AI 对弈。你可以选择PvP、PvC或者CvC。
+- **对弈**：运行 `WZQ_Pygame.py` 脚本来与 AI 对弈或者观察 AI 表现。你可以选择PvP、PvC或者CvC。训练好的模型参数在 `Trained` 文件夹。
 
 ## License
 
