@@ -121,13 +121,13 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont('calibri', 60, True, True)
 
 ### ****************************************
-AImodel = "./trained/model-20.pth" if True else None
+AImodel = "./trained/model_30.pth" if True else None
 
-player1 = PLAYER(1) if True else HumanPl(1)
-#player1 = AlphaDog(1, size, modelPath=AImodel).playMode()
+#player1 = PLAYER(1) if True else HumanPl(1)
+player1 = AlphaDog(1, size, modelPath=AImodel).playMode()
 #player1 = BetaDog(2, num_simulations=2000)
 
-#player2 = PLAYER(2) if False else HumanPl(2)
+#player2 = PLAYER(2) if True else HumanPl(2)
 player2 = AlphaDog(2, size, modelPath=AImodel).playMode()
 #player2 = BetaDog(2, num_simulations=2000)
 
@@ -141,7 +141,7 @@ while Game._Running:
     if Game.CheckKill(pygame.event.get()): break
 
     ### 一局游戏
-    while Game.winner == None:
+    while Game.winner is None:
         nowPl = Game.GetNowPl()
         clock.tick(10) # FPS=10
 

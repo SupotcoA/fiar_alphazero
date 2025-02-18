@@ -14,7 +14,7 @@ class GomokuBoard:
         self.dv = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.moves:list = [] # Player's moves
         # History Steps Memory (5 steps) # new at right
-        self.histSteps = 5
+        self.histSteps = 1
         self.History = deque([np.zeros((size, size), dtype=np.int8) for i in range(self.histSteps)], maxlen=self.histSteps)
     
     def reset(self):
@@ -59,8 +59,9 @@ class GomokuBoard:
             elif self.isDraw(): # Draw, game end
                 self.GameEnd = True
                 self.Winner = False
-            else: # Continue, switch player
-                self.PlayerNow = 1 if self.PlayerNow == 2 else 2
+            else: pass
+            # switch player
+            self.PlayerNow = 1 if self.PlayerNow == 2 else 2
             return True
         else:
             return False
@@ -96,10 +97,11 @@ class GomokuBoard:
         return np.all(self.Board != 0)
 
     def getState(self) -> np.ndarray:
-        """Get current state [8,sz,sz]
-        2 Layers: Player & opponent
+        """Get current state [5,sz,sz]
+        2 Layers: Player & Opponent
         1 Layer: Legal Position
-        5 Layers: History Moves (5 steps)
+        1 Layers: History Move
+        1 Layer: Player's Color
         """
         player = self.PlayerNow # 1=Black, 2=White
         opponent = 1 if player == 2 else 2
@@ -107,12 +109,14 @@ class GomokuBoard:
         playerPos = self.Board == player
         opponentPos = self.Board == opponent
         legalPos = self.Board == 0 # legal position
+        c = 1 if player == 1 else 0
+        color = np.full_like(playerPos, c)
         
-        state = np.stack([playerPos, opponentPos, legalPos, *self.History], axis=0).astype(np.int8)
+        state = np.stack([playerPos, opponentPos, legalPos, color, *self.History], axis=0).astype(np.int8)
         return state
     
     def getStateAsT(self) -> torch.Tensor:
-        """Get current state as Tensor [1,8,sz,sz]"""
+        """Get current state as Tensor [1,5,sz,sz]"""
         return torch.from_numpy(self.getState()).float().unsqueeze(0).to(self.dv)
 
     def __str__(self):
@@ -121,5 +125,10 @@ class GomokuBoard:
 if __name__ == "__main__":
     board = GomokuBoard()
     board.reset()
-    state = board.getStateAsT()
     print(board)
+    print(board.getStateAsT())
+    board.placeStone(1,1)
+    print(board)
+    print(board.getStateAsT())
+    print(board.getStateAsT().shape)
+    

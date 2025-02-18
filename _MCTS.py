@@ -40,18 +40,18 @@ class InvalidNode(Node):
 #####     MCTS     #####
 class MCTS():
     """Monte-Carlo Tree Search"""
-    def __init__(self, model, num_simulations:int=100, device="cpu"):
+    def __init__(self, model, num_simulations:int=100, device=None):
         """:param model: Policy-Value Network
         :param num_simulations: simulations per search
         """
         self.Model = model # Policy-Value Network
         self.Root = Node() # Root Node
         self.INVALID = InvalidNode() # Preset Invalid Node
-        self.dv = device
+        self.dv = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.Simulations = num_simulations # Simulations per Search
         ### Hyper-parameters
         self.gamma = 0.95 # Discount Factor for Future Rewards
-        self.c_puct = 1.5 # PUCT Exploration param: U(s,a) = c_puct * P(s,a) * sqrt(sum(N(s))) / (1+N(s,a))
+        self.c_puct = 3 # PUCT Exploration param: U(s,a) = c_puct * P(s,a) * sqrt(sum(N(s))) / (1+N(s,a))
     
     def setHyper(self, **kwargs):
         """:param kwargs: Hypers (simu, c_puct, noise, eps, tem)"""
@@ -77,7 +77,7 @@ class MCTS():
             pos = move[0] * board.getSize() + move[1]
             if not start.haveChildren(): self.expand(start, pos, board)
             start = start.children[pos]
-            if not start.isValid: raise IndexError("Invalid Move Recorded")
+            if not start.isValid: raise ValueError("Invalid Move Recorded")
         
         for _ in range(self.Simulations):
             self.simulate(start, board)
@@ -99,10 +99,11 @@ class MCTS():
             board_.placeStone(pos//board_.Size, pos%board_.Size)
         # Expand and Backup
         if node.isWin:
-            self.backup(1, searchPath)
+            self.backup(2, searchPath)
         else:
             policy, value = self.evalState(board_.getStateAsT().to(self.dv))
-            self.expand(node, policy.squeeze(), board_)
+            policy = torch.exp(policy.squeeze()) # logSoftmax -> Prob
+            self.expand(node, policy, board_)
             self.backup(-value.item(), searchPath) # -Value
 
     def selectChild(self, node:Node) -> tuple[int, Node]:
@@ -149,4 +150,6 @@ if __name__ == "__main__":
     board = GomokuBoard()
     print(mcts.search(board))
     board.placeStone(0, 0)
+    print(mcts.search(board))
+    board.placeStone(0, 2)
     print(mcts.search(board))
